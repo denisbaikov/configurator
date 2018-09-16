@@ -1,33 +1,26 @@
 import re
 import os, sys
 import configparser
-#import page1
-#import page3
-from mainWindow import Ui_Dialog
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import (QWidget, QApplication, QDesktopWidget, QMessageBox, QSizePolicy, \
+
+from PyQt5 import QtCore, QtGui, uic
+from PyQt5.QtWidgets import (QWidget, QDialog, QApplication, QDesktopWidget, QMessageBox, QSizePolicy, \
                              QLabel, QGridLayout, QVBoxLayout, QFrame, QTextEdit, QPushButton, QLineEdit, \
-                             QTreeWidgetItem, QSpacerItem)
+                             QTreeWidgetItem, QSpacerItem, QSizePolicy)
 
 
-class MyWindow( QtWidgets.QDialog):
+class MyWindow( QDialog ):
     def __init__(self):
         super(MyWindow, self).__init__()
-
-        self.ui = Ui_Dialog()        
+        
+        sys.path.append("./ui/")
+        window = __import__("windowMain")
+        self.ui = window.Ui_Dialog()
         self.ui.setupUi(self)
-
-        #self.pushButton = QtWidgets.QPushButton()
-        #self.pushButton.setObjectName("pushButton")
-        #self.pushButton.setText("1")
-        #page1.mywindow()
-        #page_1=page3.DHCP(self)
-        #self.widget = QtWidgets.QWidget(page_1)
-        #self.ui.gridLayout.addWidget(page_1, 0, 1, 1, 1)
-        #self.ui.verticalLayout_2.addWidget(page_1)       
-
+        
+        self.setWindowTitle("Configurator")
         self.loadModules()
+        
 
 
     def loadModules(self):
@@ -66,28 +59,11 @@ class MyWindow( QtWidgets.QDialog):
             #self.ui.verticalLayout_2.addWidget( self.modulesList[0].mywindow() )
             
             self.modulesWindow.setdefault( button, self.modulesList[0] )
-
-        '''button1 = QPushButton()
-        button1.setText('Button1')
-        self.ui.verticalLayout.addWidget(button1)
-
-        button2 = QPushButton()
-        button2.setText('Button2')'''
         
-        #self.ui.verticalLayout.addWidget(button2)
-
-        #QSpacerItem *item = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
-        #hlayout->addSpacerItem(item);
-        #QSizePolicy::Expanding, QSizePolicy::Expanding
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
         
         self.ui.verticalLayout.addSpacerItem(spacer)
-        '''topLevelItem = QTreeWidgetItem()
-        self.ui.treeView.addTopLevelItem(topLevelItem)
-        topLevelItem.setText(0, 'sss')
-        item = QTreeWidgetItem(topLevelItem);
-        item.setText(0,"Под итем");
-        self.ui.treeView.addTopLevelItem(topLevelItem)'''
+
 
     def showModelsWindow(self):
         sender = self.sender()
@@ -105,6 +81,7 @@ class MyWindow( QtWidgets.QDialog):
             self.ui.verticalLayout_2.addWidget( modelsWindow.mywindow(self) )
             spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding);
             self.ui.verticalLayout_2.addSpacerItem(spacer)
+            self.resize(self.minimumSize())
     
     
 def main():
