@@ -17,11 +17,22 @@ class MyWindow( QDialog ):
         window = __import__("windowMain")
         self.ui = window.Ui_Dialog()
         self.ui.setupUi(self)
+
+        self.setMyStyleSheet()
         
         self.setWindowTitle("Configurator")
         self.loadModules()
         
-
+    def setMyStyleSheet(self):
+        try:
+            fileWithStyle = open( "ui/styleSheet", "r" )
+        except:
+            print( "Error! Do not find file 'ui/styleSheet'" )
+        else:
+            with fileWithStyle:
+                myStyleSheet = fileWithStyle.read()
+                self.setStyleSheet( myStyleSheet )
+            
 
     def loadModules(self):
 
