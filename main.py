@@ -22,6 +22,9 @@ class MyWindow( QDialog ):
         
         self.setWindowTitle("Configurator")
         self.loadModules()
+        self.setWindowFlags(QtCore.Qt.WindowMinMaxButtonsHint | QtCore.Qt.WindowCloseButtonHint);
+        
+        #print( dir(self.ui.scrollArea()) )
         
     def setMyStyleSheet(self):
         try:
@@ -59,40 +62,45 @@ class MyWindow( QDialog ):
             print( "***  moduleName = ", moduleName )
             self.modulesList.insert( 0, __import__(moduleName) )
 
-            #print( self.modulesList[0].myModuleName() )
-            #print( dir(self.modulesList[0]) )
-
             button = QPushButton()
+            button.setMinimumSize(200, 30)
+            button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            
             button.setText( self.modulesList[0].modulename() )
             button.clicked.connect( self.showModelsWindow )
             self.ui.verticalLayout.addWidget( button )
 
-            #self.ui.verticalLayout_2.addWidget( self.modulesList[0].mywindow() )
-            
-            self.modulesWindow.setdefault( button, self.modulesList[0] )
-        
-        spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
-        
+            self.modulesWindow.setdefault( button, self.modulesList[0].moduleWindowClass())
+            self.modulesWindow.get(button).hide()
+
+        spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)        
         self.ui.verticalLayout.addSpacerItem(spacer)
 
 
     def showModelsWindow(self):
         sender = self.sender()
-        modelsWindow = self.modulesWindow.get(sender)
-        if modelsWindow != None:             
+        module  = self.modulesWindow.get(sender)
+        if module != None:
             child = self.ui.verticalLayout_2.takeAt(0)
-            while child != None:
+            while child != None:                
                 widget = child.widget()
                 if widget != None:
                     self.ui.verticalLayout_2.removeWidget(widget);
-                    widget.deleteLater()
-                    widget = None
+                    widget.hide()
                 child = self.ui.verticalLayout_2.takeAt(0)
-
-            self.ui.verticalLayout_2.addWidget( modelsWindow.mywindow(self) )
+            
+            self.ui.verticalLayout_2.addWidget( module )
             spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding);
             self.ui.verticalLayout_2.addSpacerItem(spacer)
-            self.resize(self.minimumSize())
+            module.show()
+            module.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            self.ui.scrollArea.setWidgetResizable(True)
+            self.ui.scrollArea.adjustSize()
+
+            newMainWindowWidth = module.geometry().width()
+            newMainWindowWidth += self.ui.verticalLayout.geometry().width() + 80
+
+            self.resize( newMainWindowWidth , self.geometry().height() )
     
     
 def main():

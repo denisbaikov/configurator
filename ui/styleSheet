@@ -1,4 +1,28 @@
-QWidget { 
-	background-color: #454545;
-	border: 1px solid black;
-};
+QLabel {
+color: rgb(23, 23, 23);
+font: 12pt;
+font-family: Calibril;
+}
+
+QPushButton {
+border: 1px solid Grayrgb(140,0,123);
+border-radius: 15px;
+background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop:0.51 rgb(230, 230, 230), stop: 1 rgb(255, 255, 255),
+                                       stop: 0 rgb(255, 255, 255), stop:0.5 rgb(255, 255, 255));
+font: 12pt;
+}
+
+QPushButton:checked  {
+border: 1px solid Grayrgb(140,0,123);
+border-radius: 15px;
+background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop:0 rgb(230, 230, 230), stop: 1 rgb(255, 255, 255));
+font: 12pt;
+}
+
+QLineEdit {
+    min-height: 40;
+    max-height: 40;
+    border: 1px solid Grayrgb(140,0,123);
+    border-radius: 15px;
+    font: 12pt;
+}

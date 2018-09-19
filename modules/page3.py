@@ -8,12 +8,11 @@ from PyQt5.QtWidgets import (QWidget, QApplication, QDesktopWidget, QMessageBox,
                              QLabel, QGridLayout, QVBoxLayout, QFrame, QTextEdit, QPushButton, QLineEdit)
 
 
-class DHCP(QWidget):
-    
 
-    def __init__(self, parent=None):
-        #super().__init__()
-        QtWidgets.QWidget.__init__(self, parent)
+class DHCP(QWidget):
+    def __init__(self):
+        #super(DHCP, self).__init__(parent) 
+        QWidget.__init__(self)
         self.moduleName = "DHCP"
 
         self.initUI()
@@ -37,28 +36,16 @@ class DHCP(QWidget):
         self.gridMain.addWidget(label, *(1, 0))
         self.gridMain.addWidget(self.dhcpServiceName, *(1, 1), 1, 2)
         
-        readButton = QPushButton("Read config")
-        saveButton = QPushButton("Save config and Restart DHCP-server")
-        readButton.clicked.connect(self.read_config)
-        saveButton.clicked.connect(self.save_config)
-        self.gridMain.addWidget(readButton, *(2, 1))
-        self.gridMain.addWidget(saveButton, *(2, 2))
+        self.readButton = QPushButton("Read config")
+        self.saveButton = QPushButton("Save config and Restart DHCP-server")
+        self.readButton.clicked.connect(self.read_config)
+        self.saveButton.clicked.connect(self.save_config)
+        self.gridMain.addWidget(self.readButton, *(2, 1))
+        self.gridMain.addWidget(self.saveButton, *(2, 2))
        
         self.vbox.addLayout(self.gridMain)
-
         self.setLayout(self.vbox)
         
-        self.setMinimumWidth(400)
-        self.move(0, 0)
-        self.setWindowTitle('DHCP Configurator')
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap("icon/main.png")))
-
-        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        self.setSizePolicy(sizePolicy)
-        self.show()
-
     def myModuleName(self):
         return self.moduleName
 
@@ -145,7 +132,6 @@ class DHCP(QWidget):
                 row += 1  
 
         self.vbox.addLayout(self.gridConfigs)
-        self.resize(1, 1)
         
 # delete old Labels and LineEdits if it exist
     def ClearWindow(self):
@@ -178,7 +164,7 @@ class DHCP(QWidget):
             
             if len( tmp ) > 2:
                 if tmp[0] == "option":
-                    configs_key = tmp[0]                
+                    configs_key = tmp[0]
                     configs_key += ' ' + tmp[1] 
                     if tmp[1] == "domain-name-servers":
                         self.conf.add_section('option domain-name-servers')
@@ -314,16 +300,19 @@ class DHCP(QWidget):
                        QMessageBox.critical(self, "Error", "DHCP config file success write,\n but DHCP-server is not restarted!", QMessageBox.Ok)
 
 
-def modulename():
-    aa = DHCP()
-    return aa.moduleName
+moduleName = "DHCP"
+myClass = DHCP()
 
-def mywindow(parent):
-    aa = DHCP(parent)
-    return aa
+def moduleWindowClass():
+    return myClass
+
+def modulename():
+    return moduleName
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = DHCP()
     sys.exit(app.exec_())
+
 

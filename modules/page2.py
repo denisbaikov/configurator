@@ -7,6 +7,7 @@ class Page2(QWidget):
     
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
+        #super(Page2, self).__init__(parent) 
         self.moduleName = "Page2"
 
         sys.path.append("./ui/")
@@ -14,19 +15,13 @@ class Page2(QWidget):
 
         self.ui = window.Ui_Form()        
         self.ui.setupUi(self)
-        #self.ui.show()
 
+moduleName = "Page 2"
+myClass = Page2()
+
+def moduleWindowClass():
+    return myClass
 
 def modulename():
-    aa = Page2()
-    return aa.moduleName
- 
-def mywindow(parent):
-    aa = Page2(parent)
-    return aa
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = Page1()
-    sys.exit(app.exec_())
+    return moduleName
 
