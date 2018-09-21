@@ -12,17 +12,23 @@ from PyQt5.QtWidgets import (QWidget, QDialog, QApplication, QDesktopWidget, QMe
 class MyWindow( QDialog ):
     def __init__(self):
         super(MyWindow, self).__init__()
+
+        self.flagFullScreen = False
         
         sys.path.append("./ui/")
         window = __import__("windowMain")
         self.ui = window.Ui_Dialog()
         self.ui.setupUi(self)
 
+        self.ui.pbFullScreen.clicked.connect( self.windowFullScreen )
+        self.ui.pbRoll.clicked.connect( self.windowRoll )
+        self.ui.pbClose.clicked.connect( self.windowClose )
+
         self.setMyStyleSheet()
         
         self.setWindowTitle("Configurator")
         self.loadModules()
-        self.setWindowFlags(QtCore.Qt.WindowMinMaxButtonsHint | QtCore.Qt.WindowCloseButtonHint);
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint);
         
         #print( dir(self.ui.scrollArea()) )
         
@@ -101,7 +107,21 @@ class MyWindow( QDialog ):
             newMainWindowWidth += self.ui.verticalLayout.geometry().width() + 80
 
             self.resize( newMainWindowWidth , self.geometry().height() )
-    
+
+    def windowRoll(self):
+        self.showMinimized()
+        
+    def windowFullScreen(self):
+        if self.flagFullScreen:
+            self.flagFullScreen = False
+            self.showNormal()
+        else:
+            
+            self.showFullScreen()
+            self.flagFullScreen = True
+        
+    def windowClose(self):
+        sys.exit()
     
 def main():
     app = QApplication(sys.argv)
