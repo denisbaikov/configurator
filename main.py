@@ -14,6 +14,9 @@ class MyWindow( QDialog ):
         super(MyWindow, self).__init__()
 
         self.flagFullScreen = False
+        #self.flagFrameUndeMouse = False
+        self.current = 0
+        self.pressed = False
         
         sys.path.append("./ui/")
         window = __import__("windowMain")
@@ -24,11 +27,10 @@ class MyWindow( QDialog ):
         self.ui.pbRoll.clicked.connect( self.windowRoll )
         self.ui.pbClose.clicked.connect( self.windowClose )
 
-        self.setMyStyleSheet()
-        
         self.setWindowTitle("Configurator")
+        self.setMyStyleSheet()                
         self.loadModules()
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint);
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         
         #print( dir(self.ui.scrollArea()) )
         
@@ -41,7 +43,6 @@ class MyWindow( QDialog ):
             with fileWithStyle:
                 myStyleSheet = fileWithStyle.read()
                 self.setStyleSheet( myStyleSheet )
-            
 
     def loadModules(self):
 
@@ -122,9 +123,24 @@ class MyWindow( QDialog ):
     def windowClose(self):
         sys.exit()
 
+    def mousePressEvent(self, event):
+        self.current = event.pos()
+
+    def mouseMoveEvent(self, event):
+        if self.pressed == True:
+            self.move(self.mapToParent(event.pos() - self.current))
+
+    def eventFilter(self, obj, event):
+        if obj == self.ui.frame and event.type() == QtCore.QEvent.MouseButtonPress:
+            self.pressed = True
+
+        if obj == self.ui.frame and event.type() == QtCore.QEvent.MouseButtonRelease:
+            self.pressed = False
+            
+        return super(MyWindow, self).eventFilter(obj, event)
+
 
 if __name__ == "__main__":
-    #main()
     app = QApplication(sys.argv)
     w = MyWindow()
     w.show()
