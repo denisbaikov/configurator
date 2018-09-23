@@ -116,21 +116,20 @@ class MyWindow( QDialog ):
             self.flagFullScreen = False
             self.showNormal()
         else:
-            
             self.showFullScreen()
             self.flagFullScreen = True
         
     def windowClose(self):
         sys.exit()
-    
-def main():
+
+
+if __name__ == "__main__":
+    #main()
     app = QApplication(sys.argv)
     w = MyWindow()
     w.show()
+    app.installEventFilter(w) 
     sys.exit(app.exec_())
-
-if __name__ == "__main__":
-    main()
 
 
 
