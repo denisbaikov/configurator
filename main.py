@@ -18,8 +18,9 @@ class MyWindow( QDialog ):
         #self.flagFrameUndeMouse = False
         self.current = 0
         self.pressed = False
-        
-        sys.path.append("./ui/")
+
+        path = '.' + os.path.sep + 'ui'
+        sys.path.append(path)
         window = __import__("windowMain")
         self.ui = window.Ui_Dialog()
         self.ui.setupUi(self)
@@ -29,14 +30,26 @@ class MyWindow( QDialog ):
         self.ui.pbClose.clicked.connect( self.windowClose )
 
         self.setWindowTitle("Configurator")
+        self.setupIcon()
+
         self.setMyStyleSheet()                
         self.loadModules()
         self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)
         #pyautogui.keyDown('alt')
+
+
+    def setupIcon(self):
+        path = 'ui' + os.path.sep + 'mainWindow.ico'
+        self.setWindowIcon( QtGui.QIcon(path) )
+        pixmapIcon = QtGui.QPixmap( path )
+        w = self.ui.labelIcon.width()
+        h = self.ui.labelIcon.height()
+        self.ui.labelIcon.setPixmap( pixmapIcon.scaled(w, h, QtCore.Qt.KeepAspectRatio) )
         
     def setMyStyleSheet(self):
         try:
-            fileWithStyle = open( "ui/styleSheet", "r" )
+            path = 'ui' + os.path.sep + 'styleSheet'
+            fileWithStyle = open( path, "r" )
         except:
             print( "Error! Do not find file 'ui/styleSheet'" )
         else:
@@ -49,7 +62,7 @@ class MyWindow( QDialog ):
         self.modulesList = []
         self.modulesWindow = {}
 
-        modulesDir = "./modules/"
+        modulesDir = '.' + os.path.sep + 'modules'
 
         if os.path.isdir(modulesDir) == False:
            print( "Error! Not found directory 'modules' with modules!" )
