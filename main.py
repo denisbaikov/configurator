@@ -1,6 +1,7 @@
 import re
 import os, sys
 import configparser
+import pyautogui 
 
 
 from PyQt5 import QtCore, QtGui, uic
@@ -30,9 +31,8 @@ class MyWindow( QDialog ):
         self.setWindowTitle("Configurator")
         self.setMyStyleSheet()                
         self.loadModules()
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        
-        #print( dir(self.ui.scrollArea()) )
+        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)
+        #pyautogui.keyDown('alt')
         
     def setMyStyleSheet(self):
         try:
@@ -123,21 +123,44 @@ class MyWindow( QDialog ):
     def windowClose(self):
         sys.exit()
 
-    def mousePressEvent(self, event):
-        self.current = event.pos()
+    '''def mousePressEvent(self, event):
+        #pyautogui.keyDown('alt')
+        print('Press ')
+        #self.pressed = True
+        #self.current = self.mapFromGlobal(QtGui.QCursor.pos()) #event.pos()
+
+    def mouseReleaseEvent(self, event):
+        print('Release')
+        #pyautogui.press('alt')
+        #pyautogui.keyUp('alt')
+        #pyautogui.press('alt')
+        #self.pressed = False
+        #self.current = QtCore.QPoint(-1, -1)'''
 
     def mouseMoveEvent(self, event):
         if self.pressed == True:
-            self.move(self.mapToParent(event.pos() - self.current))
+            if event.buttons() == QtCore.Qt.LeftButton:             
+                self.move(self.mapToGlobal( self.mapFromGlobal(QtGui.QCursor.pos()) - self.current) )
+                print('QtCore.QCursor.pos()', self.mapFromGlobal(QtGui.QCursor.pos()))                
+                print('self.current', self.current)
+                print('global', self.mapToGlobal( self.mapFromGlobal(QtGui.QCursor.pos()) - self.current) )
+                print('#############')
+
 
     def eventFilter(self, obj, event):
         if obj == self.ui.frame and event.type() == QtCore.QEvent.MouseButtonPress:
-            self.pressed = True
+            if event.buttons() == QtCore.Qt.LeftButton:
+                self.pressed = True
+                self.current = self.mapFromGlobal(QtGui.QCursor.pos())
+                print('MouseButtonPress')
 
         if obj == self.ui.frame and event.type() == QtCore.QEvent.MouseButtonRelease:
             self.pressed = False
+            self.current = QtCore.QPoint(-1, -1)
+            print('MouseButtonRelease')
             
         return super(MyWindow, self).eventFilter(obj, event)
+
 
 
 if __name__ == "__main__":
