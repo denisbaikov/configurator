@@ -15,7 +15,6 @@ class MyWindow( QDialog ):
         super(MyWindow, self).__init__()
 
         self.flagFullScreen = False
-        #self.flagFrameUndeMouse = False
         self.current = 0
         self.pressed = False
 
@@ -35,7 +34,6 @@ class MyWindow( QDialog ):
         self.setMyStyleSheet()                
         self.loadModules()
         self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)
-        #pyautogui.keyDown('alt')
 
 
     def setupIcon(self):
@@ -161,13 +159,14 @@ class MyWindow( QDialog ):
 
 
     def eventFilter(self, obj, event):
-        if obj == self.ui.frame and event.type() == QtCore.QEvent.MouseButtonPress:
+        if obj == self.ui.frameTitleBar and event.type() == QtCore.QEvent.MouseButtonDblClick:
+            self.windowFullScreen()        
+        elif obj == self.ui.frameTitleBar and event.type() == QtCore.QEvent.MouseButtonPress:
             if event.buttons() == QtCore.Qt.LeftButton:
                 self.pressed = True
                 self.current = self.mapFromGlobal(QtGui.QCursor.pos())
                 print('MouseButtonPress')
-
-        if obj == self.ui.frame and event.type() == QtCore.QEvent.MouseButtonRelease:
+        elif obj == self.ui.frameTitleBar and event.type() == QtCore.QEvent.MouseButtonRelease:
             self.pressed = False
             self.current = QtCore.QPoint(-1, -1)
             print('MouseButtonRelease')
