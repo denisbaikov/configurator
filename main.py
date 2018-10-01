@@ -19,7 +19,7 @@ class ClickableFrame( QFrame ):
 
 
 class MyWindow( QDialog ):
-    def __init__(self):
+    def __init__(self, fakeTotleBar=None):
         super(MyWindow, self).__init__()
 
         self.flagFullScreen = False
@@ -32,21 +32,27 @@ class MyWindow( QDialog ):
         self.ui = window.Ui_Dialog()
         self.ui.setupUi(self)
 
-        self.ui.pbFullScreen.clicked.connect( self.windowFullScreen )
-        self.ui.pbRoll.clicked.connect( self.windowRoll )
-        self.ui.pbClose.clicked.connect( self.windowClose )
-
         self.setWindowTitle("Configurator")
-        self.setupIcon()
-
         self.setMyStyleSheet()                
         self.loadModules()
 
-        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)
-       
+        path = './ui' + os.path.sep + 'mainWindow.ico'
+        self.setWindowIcon( QtGui.QIcon(path) )
+
+        if fakeTotleBar is not None:
+            self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)
+            self.ui.pbFullScreen.clicked.connect( self.windowFullScreen )
+            self.ui.pbRoll.clicked.connect( self.windowRoll )
+            self.ui.pbClose.clicked.connect( self.windowClose )
+            self.setupIconFakeTitle()
+        else:
+            self.ui.frameTitleBar.hide()
+            self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowMinimizeButtonHint| QtCore.Qt.WindowMaximizeButtonHint | QtCore.Qt.WindowCloseButtonHint )
+            self.setContentsMargins(0,9,0,0)            
+        
 
 
-    def setupIcon(self):
+    def setupIconFakeTitle(self):
         path = 'ui' + os.path.sep + 'mainWindow.ico'
         self.setWindowIcon( QtGui.QIcon(path) )
         pixmapIcon = QtGui.QPixmap( path )
@@ -208,10 +214,10 @@ class MyWindow( QDialog ):
 if __name__ == "__main__":
     
     app = QApplication(sys.argv)
-    w = MyWindow()
+    if len (sys.argv) >= 2:
+        w = MyWindow( sys.argv[1] )
+    else:
+        w = MyWindow()
     w.show()
     app.installEventFilter(w) 
     sys.exit(app.exec_())
-
-
-
