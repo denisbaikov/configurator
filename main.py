@@ -6,8 +6,16 @@ import pyautogui
 
 from PyQt5 import QtCore, QtGui, uic
 from PyQt5.QtWidgets import (QWidget, QDialog, QApplication, QDesktopWidget, QMessageBox, QSizePolicy, \
-                             QLabel, QGridLayout, QVBoxLayout, QFrame, QTextEdit, QPushButton, QLineEdit, \
-                             QTreeWidgetItem, QSpacerItem, QSizePolicy)
+                             QLabel, QGridLayout, QVBoxLayout, QHBoxLayout, QFrame, QTextEdit, QPushButton, QToolButton, \
+                             QLineEdit, QTreeWidgetItem, QSpacerItem, QSizePolicy)
+
+
+class ClickableFrame( QFrame ):
+    clicked = QtCore.pyqtSignal()
+ 
+    def mouseReleaseEvent(self, event):
+        QFrame.mouseReleaseEvent(self, event)
+        self.clicked.emit()
 
 
 class MyWindow( QDialog ):
@@ -33,7 +41,9 @@ class MyWindow( QDialog ):
 
         self.setMyStyleSheet()                
         self.loadModules()
+
         self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)
+       
 
 
     def setupIcon(self):
@@ -46,10 +56,10 @@ class MyWindow( QDialog ):
         
     def setMyStyleSheet(self):
         try:
-            path = 'ui' + os.path.sep + 'styleSheet'
+            path = '.' + os.path.sep + 'ui' + os.path.sep + 'qssMain'
             fileWithStyle = open( path, "r" )
         except:
-            print( "Error! Do not find file 'ui/styleSheet'" )
+            print( "Error! Do not find file 'ui/qssMain'" )
         else:
             with fileWithStyle:
                 myStyleSheet = fileWithStyle.read()
@@ -79,30 +89,64 @@ class MyWindow( QDialog ):
             moduleName = re.sub(r'.py', '', name)
             print( "***  moduleName = ", moduleName )
             self.modulesList.insert( 0, __import__(moduleName) )
-
-            button = QPushButton()
-            button.setMinimumSize(200, 30)
-            button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
             
-            button.setText( self.modulesList[0].modulename() )
-            button.clicked.connect( self.showModelsWindow )
-            self.ui.verticalLayout.addWidget( button )
+            menuButton = QPushButton()
+            menuButton.setCheckable(True)
+            menuButton.setMinimumSize(200, 32)
+            menuButton.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            
+            menuButton.setText( self.modulesList[0].modulename() )
+            menuButton.clicked.connect( self.showModelsWindow )
+            menuButton.clicked.connect( self.uncheckOtherButtons )
+            path = '.\\' + os.path.sep + 'ui\\' + os.path.sep + 'icon_' + name[:-3] + '.png'
+            menuButton.setStyleSheet("QPushButton{"\
+                                 "padding: 0 0 2px;"\
+                                 "font: 16px \"Trebuchet MS\", Tahoma, Arial, sans-serif;"\
+                                 "outline: none;"\
+                                 "position: relative;"\
+                                 "border-radius: 5px;"\
+                                 "color: #555;"\
+                                 "border: 1px solid #BBB;"\
+                                 "border-top: 1px solid #D0D0D0;"\
+                                 "border-bottom: 1px solid #A5A5A5;"\
+                                 "background: url('"+ path + "') no-repeat top left;"\
+                                 "background-color: rgb(220, 220, 220);"\
+                                 "}"\
+                                 "QPushButton:pressed, QPushButton:checked {"\
+                                 "font: 19px \"Trebuchet MS\", Tahoma, Arial, sans-serif;"\
+                                 "background:  QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop:0 rgb(250, 250, 250),"\
+                                              "stop: 1 rgb(255, 255, 255)) url('"+ path + "') no-repeat top left; }"\
+                                 "}"\
+                                 "QPushButton:hover{"\
+                                 "background:  QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop:0 rgb(150, 150, 150),"\
+                                              "stop: 1 rgb(255, 255, 255)) url('"+ path + "') no-repeat top left;"\
+                                 "}"  )
 
-            self.modulesWindow.setdefault( button, self.modulesList[0].moduleWindowClass())
-            self.modulesWindow.get(button).hide()
+            self.ui.verticalLayout.addWidget( menuButton )
+
+            self.modulesWindow.setdefault( menuButton, self.modulesList[0].moduleWindowClass())
+            self.modulesWindow.get(menuButton).hide()
 
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)        
         self.ui.verticalLayout.addSpacerItem(spacer)
 
+    def uncheckOtherButtons(self):
+        senderButton = self.sender()
+        for menuButton in self.modulesWindow.keys():
+            if menuButton == senderButton:
+                menuButton.setChecked(True)
+            else:
+                menuButton.setChecked(False)
+                    
 
     def showModelsWindow(self):
         sender = self.sender()
         module  = self.modulesWindow.get(sender)
-        if module != None:
+        if module is not None:
             child = self.ui.verticalLayout_2.takeAt(0)
-            while child != None:                
+            while child is not None:                
                 widget = child.widget()
-                if widget != None:
+                if widget is not None:
                     self.ui.verticalLayout_2.removeWidget(widget);
                     widget.hide()
                 child = self.ui.verticalLayout_2.takeAt(0)
@@ -134,28 +178,14 @@ class MyWindow( QDialog ):
     def windowClose(self):
         sys.exit()
 
-    '''def mousePressEvent(self, event):
-        #pyautogui.keyDown('alt')
-        print('Press ')
-        #self.pressed = True
-        #self.current = self.mapFromGlobal(QtGui.QCursor.pos()) #event.pos()
-
-    def mouseReleaseEvent(self, event):
-        print('Release')
-        #pyautogui.press('alt')
-        #pyautogui.keyUp('alt')
-        #pyautogui.press('alt')
-        #self.pressed = False
-        #self.current = QtCore.QPoint(-1, -1)'''
-
     def mouseMoveEvent(self, event):
         if self.pressed == True:
             if event.buttons() == QtCore.Qt.LeftButton:             
                 self.move(self.mapToGlobal( self.mapFromGlobal(QtGui.QCursor.pos()) - self.current) )
-                print('QtCore.QCursor.pos()', self.mapFromGlobal(QtGui.QCursor.pos()))                
+                '''print('QtCore.QCursor.pos()', self.mapFromGlobal(QtGui.QCursor.pos()))                
                 print('self.current', self.current)
                 print('global', self.mapToGlobal( self.mapFromGlobal(QtGui.QCursor.pos()) - self.current) )
-                print('#############')
+                print('#############')'''
 
 
     def eventFilter(self, obj, event):
@@ -165,17 +195,18 @@ class MyWindow( QDialog ):
             if event.buttons() == QtCore.Qt.LeftButton:
                 self.pressed = True
                 self.current = self.mapFromGlobal(QtGui.QCursor.pos())
-                print('MouseButtonPress')
+                #print('MouseButtonPress')
         elif obj == self.ui.frameTitleBar and event.type() == QtCore.QEvent.MouseButtonRelease:
             self.pressed = False
             self.current = QtCore.QPoint(-1, -1)
-            print('MouseButtonRelease')
+            #print('MouseButtonRelease')
             
         return super(MyWindow, self).eventFilter(obj, event)
 
 
 
 if __name__ == "__main__":
+    
     app = QApplication(sys.argv)
     w = MyWindow()
     w.show()
