@@ -11,8 +11,8 @@ class Page1(QWidget):
     def __init__(self):
 
         QWidget.__init__(self)
-        #super(Page1, self).__init__(parent) 
-        #self.moduleName = "Page1"
+        self.moduleName = "Page1"
+        self.serviceName = "sshd"
 
         sys.path.append("./ui/")
         window = __import__("windowPage1")
@@ -23,12 +23,18 @@ class Page1(QWidget):
 
 moduleName = "Page 1"
 myClass = Page1()
+satelliteModules = []
+moduleLevel = 0
 
-def moduleWindowClass():
+def getModuleWindowClass():
     return myClass
 
-def modulename():
+def getModuleName():
     return moduleName
 
+def getSatelliteModules():
+    return satelliteModules
 
+def getModuleLevel():
+    return moduleLevel
 

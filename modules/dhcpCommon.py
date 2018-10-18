@@ -3,24 +3,28 @@ import sys
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import (QWidget, QApplication)
 
-class Page2(QWidget):
+
+
+class Page1(QWidget):
     
-    def __init__(self, parent=None):
-        QWidget.__init__(self, parent)
-        #super(Page2, self).__init__(parent) 
-        self.moduleName = "Page2"
-        self.serviceName = "network"
+
+    def __init__(self):
+
+        QWidget.__init__(self)
+        self.moduleName = "dhcpCommon"
+        self.serviceName = "sshd"
 
         sys.path.append("./ui/")
-        window = __import__("windowPage2")
+        window = __import__("windowPage1")
 
         self.ui = window.Ui_Form()        
         self.ui.setupUi(self)
 
-moduleName = "Page 2"
-myClass = Page2()
+
+moduleName = "dhcpCommon"
+myClass = Page1()
 satelliteModules = []
-moduleLevel = 0
+moduleLevel = 1
 
 def getModuleWindowClass():
     return myClass
@@ -33,3 +37,6 @@ def getSatelliteModules():
 
 def getModuleLevel():
     return moduleLevel
+
+
+

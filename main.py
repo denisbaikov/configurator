@@ -2,12 +2,15 @@ import re
 import os, sys
 import configparser
 import pyautogui 
-
+import subprocess
 
 from PyQt5 import QtCore, QtGui, uic
 from PyQt5.QtWidgets import (QWidget, QDialog, QApplication, QDesktopWidget, QMessageBox, QSizePolicy, \
                              QLabel, QGridLayout, QVBoxLayout, QHBoxLayout, QFrame, QTextEdit, QPushButton, QToolButton, \
                              QLineEdit, QTreeWidgetItem, QSpacerItem, QSizePolicy)
+
+defineMenuButtonMain        = 1
+defineMenuButtonSatellite   = 2
 
 
 class ClickableFrame( QFrame ):
@@ -22,9 +25,16 @@ class MyWindow( QDialog ):
     def __init__(self, fakeTotleBar=None):
         super(MyWindow, self).__init__()
 
+
+        self.rowsMainButtons = 0
         self.flagFullScreen = False
         self.current = 0
         self.pressed = False
+        self.levelListMainButton = [[], [], []]
+
+        self.modulesWindow = {}
+        self.moduleSatellites = {}
+        self.ignoreModules = [] 
 
         path = '.' + os.path.sep + 'ui'
         sys.path.append(path)
@@ -33,7 +43,7 @@ class MyWindow( QDialog ):
         self.ui.setupUi(self)
 
         self.setWindowTitle("Configurator")
-        self.setMyStyleSheet()                
+        self.setMyStyleSheet()
         self.loadModules()
 
         path = './ui' + os.path.sep + 'mainWindow.ico'
@@ -48,8 +58,7 @@ class MyWindow( QDialog ):
         else:
             self.ui.frameTitleBar.hide()
             self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowMinimizeButtonHint| QtCore.Qt.WindowMaximizeButtonHint | QtCore.Qt.WindowCloseButtonHint )
-            self.setContentsMargins(0,9,0,0)            
-        
+            self.setContentsMargins(0,9,0,0)
 
 
     def setupIconFakeTitle(self):
@@ -59,7 +68,7 @@ class MyWindow( QDialog ):
         w = self.ui.labelIcon.width()
         h = self.ui.labelIcon.height()
         self.ui.labelIcon.setPixmap( pixmapIcon.scaled(w, h, QtCore.Qt.KeepAspectRatio) )
-        
+
     def setMyStyleSheet(self):
         try:
             path = '.' + os.path.sep + 'ui' + os.path.sep + 'qssMain'
@@ -72,10 +81,6 @@ class MyWindow( QDialog ):
                 self.setStyleSheet( myStyleSheet )
 
     def loadModules(self):
-
-        self.modulesList = []
-        self.modulesWindow = {}
-
         modulesDir = '.' + os.path.sep + 'modules'
 
         if os.path.isdir(modulesDir) == False:
@@ -94,18 +99,36 @@ class MyWindow( QDialog ):
 
             moduleName = re.sub(r'.py', '', name)
             print( "***  moduleName = ", moduleName )
-            self.modulesList.insert( 0, __import__(moduleName) )
+
+            if self.ignoreModules.count(moduleName) > 0:
+                print( "No satellites" )
+                continue
             
-            menuButton = QPushButton()
-            menuButton.setCheckable(True)
-            menuButton.setMinimumSize(200, 32)
-            menuButton.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            
-            menuButton.setText( self.modulesList[0].modulename() )
-            menuButton.clicked.connect( self.showModelsWindow )
-            menuButton.clicked.connect( self.uncheckOtherButtons )
-            path = '.\\' + os.path.sep + 'ui\\' + os.path.sep + 'icon_' + name[:-3] + '.png'
-            menuButton.setStyleSheet("QPushButton{"\
+            self.addMenuButton(moduleName)
+
+        spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.ui.gridLayout_2.addItem( spacer, *(self.rowsMainButtons, 0), 1, 3)
+        
+
+    def addMenuButton(self, moduleName):
+        #self.modulesList.insert( 0, __import__(moduleName) )
+        self.ignoreModules.insert(0, moduleName)
+        
+        currentModule = __import__(moduleName)
+      
+        menuButton = QPushButton()
+        menuButton.setCheckable(True)
+        menuButton.setMinimumSize(200, 32)
+        menuButton.setMaximumSize(200, 32)
+        menuButton.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+      
+        #menuButton.setText( self.modulesList[0].getModuleName() )
+        menuButton.setText( currentModule.getModuleName() )
+        menuButton.clicked.connect( self.showModelsWindow )
+        menuButton.clicked.connect( self.uncheckOtherButtons )
+        #path = '.\\' + os.path.sep + 'ui\\' + os.path.sep + 'icon_' + name[:-3] + '.png'
+        path = '.\\' + os.path.sep + 'ui\\' + os.path.sep + 'icon_' + moduleName + '.png'
+        menuButton.setStyleSheet("QPushButton{"\
                                  "padding: 0 0 2px;"\
                                  "font: 16px \"Trebuchet MS\", Tahoma, Arial, sans-serif;"\
                                  "outline: none;"\
@@ -128,29 +151,76 @@ class MyWindow( QDialog ):
                                               "stop: 1 rgb(255, 255, 255)) url('"+ path + "') no-repeat top left;"\
                                  "}"  )
 
-            self.ui.verticalLayout.addWidget( menuButton )
+        moduleLevel = currentModule.getModuleLevel()
+        if moduleLevel == 0:
+            self.ui.gridLayout_2.addWidget( menuButton, *(self.rowsMainButtons, 0), 1, 4)
+        elif moduleLevel == 1:
+            self.ui.gridLayout_2.addWidget( menuButton, *(self.rowsMainButtons, 1), 1, 3)
+            menuButton.hide()
 
-            self.modulesWindow.setdefault( menuButton, self.modulesList[0].moduleWindowClass())
-            self.modulesWindow.get(menuButton).hide()
+        self.levelListMainButton[moduleLevel].insert(0, menuButton)
+        self.rowsMainButtons += 1
 
-        spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)        
-        self.ui.verticalLayout.addSpacerItem(spacer)
+        self.modulesWindow.setdefault( menuButton, currentModule.getModuleWindowClass() )
+        self.modulesWindow.get(menuButton).hide()
+
+        satellites = currentModule.getSatelliteModules()
+        if satellites:
+            self.moduleSatellites.setdefault( menuButton, [])
+            for satellite in satellites:
+                self.moduleSatellites.get(menuButton).insert( 0, self.addMenuButton(satellite)  )
+        else:
+            self.moduleSatellites.setdefault(  menuButton, [])
+
+        return menuButton
+    
+    def changeVisibleButton(self, button):
+        print("button = ", button)
+        if button.isVisible():
+            button.hide()
+        else:
+            button.show()
+
 
     def uncheckOtherButtons(self):
         senderButton = self.sender()
         for menuButton in self.modulesWindow.keys():
             if menuButton == senderButton:
                 menuButton.setChecked(True)
+                if menuButton == self.FixMainButton:
+                    satelliteList = self.moduleSatellites.get(menuButton)
+                    if satelliteList:
+                        print(satelliteList)
+                        for ii in satelliteList:
+                            self.changeVisibleButton(ii)
             else:
+                if menuButton == self.FixMainButton:
+                    continue
+                
+                satelliteList = self.moduleSatellites.get(menuButton)
+                if satelliteList:
+                    for ii in satelliteList:
+                        ii.hide()
                 menuButton.setChecked(False)
                     
 
     def showModelsWindow(self):
         sender = self.sender()
+
+        if self.levelListMainButton[0].count(sender) > 0:
+            self.FixMainButton = sender
+        
         module  = self.modulesWindow.get(sender)
         if module is not None:
+            command = "rpm -qc {0}".format( module.serviceName )
+            pipe = os.popen(command)
+            requestRes = pipe.read()
+            badRequestResult = requestRes.find("не установлен")
+            if  badRequestResult != -1:
+                QMessageBox.information(self, "Configurator", "Сервис {0} не установлен!".format( module.serviceName ), QMessageBox.Ok)
+                return
             child = self.ui.verticalLayout_2.takeAt(0)
-            while child is not None:                
+            while child is not None:
                 widget = child.widget()
                 if widget is not None:
                     self.ui.verticalLayout_2.removeWidget(widget);
@@ -166,7 +236,7 @@ class MyWindow( QDialog ):
             self.ui.scrollArea.adjustSize()
 
             newMainWindowWidth = module.geometry().width()
-            newMainWindowWidth += self.ui.verticalLayout.geometry().width() + 80
+            newMainWindowWidth += self.ui.gridLayout_2.geometry().width() + 80
 
             self.resize( newMainWindowWidth , self.geometry().height() )
 
@@ -221,3 +291,4 @@ if __name__ == "__main__":
     w.show()
     app.installEventFilter(w) 
     sys.exit(app.exec_())
+

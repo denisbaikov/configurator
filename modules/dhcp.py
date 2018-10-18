@@ -13,7 +13,8 @@ class DHCP(QWidget):
     def __init__(self):
         #super(DHCP, self).__init__(parent) 
         QWidget.__init__(self)
-        self.moduleName = "DHCP"
+        self.moduleName = "Настройка DHCP"
+        self.serviceName = "dhcp"
 
         self.initUI()
 
@@ -300,14 +301,22 @@ class DHCP(QWidget):
                        QMessageBox.critical(self, "Error", "DHCP config file success write,\n but DHCP-server is not restarted!", QMessageBox.Ok)
 
 
-moduleName = "DHCP"
+moduleName = "Настройка DHCP"
 myClass = DHCP()
+satelliteModules = ["dhcpCommon", "dhcpStatic", "dhcpSubnet"]
+moduleLevel = 0
 
-def moduleWindowClass():
+def getModuleWindowClass():
     return myClass
 
-def modulename():
+def getModuleName():
     return moduleName
+
+def getSatelliteModules():
+    return satelliteModules
+
+def getModuleLevel():
+    return moduleLevel
 
 
 if __name__ == '__main__':
