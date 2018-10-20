@@ -118,8 +118,8 @@ class MyWindow( QDialog ):
       
         menuButton = QPushButton()
         menuButton.setCheckable(True)
-        menuButton.setMinimumSize(200, 32)
-        menuButton.setMaximumSize(200, 32)
+        #menuButton.setMinimumSize(200, 32)
+        #menuButton.setMaximumSize(200, 32)
         menuButton.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
       
         #menuButton.setText( self.modulesList[0].getModuleName() )
@@ -153,10 +153,14 @@ class MyWindow( QDialog ):
 
         moduleLevel = currentModule.getModuleLevel()
         if moduleLevel == 0:
-            self.ui.gridLayout_2.addWidget( menuButton, *(self.rowsMainButtons, 0), 1, 4)
+            self.ui.gridLayout_2.addWidget( menuButton, *(self.rowsMainButtons, 0), 1, 2, QtCore.Qt.AlignRight)
+            menuButton.setMinimumSize(230, 32)
+            menuButton.setMaximumSize(230, 32)        
         elif moduleLevel == 1:
-            self.ui.gridLayout_2.addWidget( menuButton, *(self.rowsMainButtons, 1), 1, 3)
-            menuButton.hide()
+            self.ui.gridLayout_2.addWidget( menuButton, *(self.rowsMainButtons, 1), 1, 1, QtCore.Qt.AlignRight)
+            menuButton.setMinimumSize(200, 32)
+            menuButton.setMaximumSize(200, 32)
+        
 
         self.levelListMainButton[moduleLevel].insert(0, menuButton)
         self.rowsMainButtons += 1
@@ -178,6 +182,8 @@ class MyWindow( QDialog ):
         print("button = ", button)
         if button.isVisible():
             button.hide()
+            self.FixMainButton.setChecked(False)
+            self.modulesWindow.get( self.FixMainButton).hide()
         else:
             button.show()
 
