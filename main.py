@@ -111,22 +111,17 @@ class MyWindow( QDialog ):
         
 
     def addMenuButton(self, moduleName):
-        #self.modulesList.insert( 0, __import__(moduleName) )
-        self.ignoreModules.insert(0, moduleName)
         
+        self.ignoreModules.insert(0, moduleName)        
         currentModule = __import__(moduleName)
       
         menuButton = QPushButton()
         menuButton.setCheckable(True)
-        #menuButton.setMinimumSize(200, 32)
-        #menuButton.setMaximumSize(200, 32)
         menuButton.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
       
-        #menuButton.setText( self.modulesList[0].getModuleName() )
         menuButton.setText( currentModule.getModuleName() )
         menuButton.clicked.connect( self.showModelsWindow )
         menuButton.clicked.connect( self.uncheckOtherButtons )
-        #path = '.\\' + os.path.sep + 'ui\\' + os.path.sep + 'icon_' + name[:-3] + '.png'
         path = '.\\' + os.path.sep + 'ui\\' + os.path.sep + 'icon_' + moduleName + '.png'
         menuButton.setStyleSheet("QPushButton{"\
                                  "padding: 0 0 2px;"\
@@ -160,6 +155,7 @@ class MyWindow( QDialog ):
             self.ui.gridLayout_2.addWidget( menuButton, *(self.rowsMainButtons, 1), 1, 1, QtCore.Qt.AlignRight)
             menuButton.setMinimumSize(200, 32)
             menuButton.setMaximumSize(200, 32)
+            menuButton.hide()
         
 
         self.levelListMainButton[moduleLevel].insert(0, menuButton)
@@ -183,7 +179,7 @@ class MyWindow( QDialog ):
         if button.isVisible():
             button.hide()
             self.FixMainButton.setChecked(False)
-            self.modulesWindow.get( self.FixMainButton).hide()
+            self.modulesWindow.get( self.FixMainButton ).hide()
         else:
             button.show()
 
@@ -222,17 +218,17 @@ class MyWindow( QDialog ):
             pipe = os.popen(command)
             requestRes = pipe.read()
             badRequestResult = requestRes.find("не установлен")
-            if  badRequestResult != -1:
-                QMessageBox.information(self, "Configurator", "Сервис {0} не установлен!".format( module.serviceName ), QMessageBox.Ok)
-                return
             child = self.ui.verticalLayout_2.takeAt(0)
             while child is not None:
                 widget = child.widget()
                 if widget is not None:
-                    self.ui.verticalLayout_2.removeWidget(widget);
+                    self.ui.verticalLayout_2.removeWidget(widget)
                     widget.hide()
                 child = self.ui.verticalLayout_2.takeAt(0)
-            
+            if  badRequestResult != -1:
+                QMessageBox.information(self, "Configurator", "Сервис {0} не установлен!".format( module.serviceName ), QMessageBox.Ok)
+                return
+
             self.ui.verticalLayout_2.addWidget( module )
             spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding);
             self.ui.verticalLayout_2.addSpacerItem(spacer)
