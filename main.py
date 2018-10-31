@@ -25,7 +25,7 @@ class MyWindow( QDialog ):
     def __init__(self, fakeTotleBar=None):
         super(MyWindow, self).__init__()
 
-
+        self.FixMainButton=0
         self.rowsMainButtons = 0
         self.flagFullScreen = False
         self.current = 0
@@ -218,6 +218,8 @@ class MyWindow( QDialog ):
             pipe = os.popen(command)
             requestRes = pipe.read()
             badRequestResult = requestRes.find("не установлен")
+            #if  badRequestResult != -1:
+            #    QMessageBox.information(self, "Configurator", "Сервис {0} не установлен!".format( module.serviceName ), QMessageBox.Ok)
             child = self.ui.verticalLayout_2.takeAt(0)
             while child is not None:
                 widget = child.widget()
