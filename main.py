@@ -3,7 +3,9 @@ import os, sys
 import configparser
 import pyautogui 
 import subprocess
+import subprocess
 
+#from subprocess import Popen, PIPE
 from PyQt5 import QtCore, QtGui, uic
 from PyQt5.QtWidgets import (QWidget, QDialog, QApplication, QDesktopWidget, QMessageBox, QSizePolicy, \
                              QLabel, QGridLayout, QVBoxLayout, QHBoxLayout, QFrame, QTextEdit, QPushButton, QToolButton, \
@@ -45,6 +47,7 @@ class MyWindow( QDialog ):
         self.setWindowTitle("Configurator")
         self.setMyStyleSheet()
         self.loadModules()
+        self.makeBackendScriptsExec()
 
         path = './ui' + os.path.sep + 'mainWindow.ico'
         self.setWindowIcon( QtGui.QIcon(path) )
@@ -60,6 +63,13 @@ class MyWindow( QDialog ):
             self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowMinimizeButtonHint| QtCore.Qt.WindowMaximizeButtonHint | QtCore.Qt.WindowCloseButtonHint )
             self.setContentsMargins(0,9,0,0)
 
+    def makeBackendScriptsExec(self):
+        try:
+            subprocess.check_call("chmod +x ./backend/*", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            print('Ошибка! Команда \n> {}\nзавершилась с кодом {}'.format(e.cmd, e.returncode))
+            QMessageBox.critical(self, "Configurator", "Не удалось сменить права файлов-скриптов backend в директории ./backend/\nВозможно некорректная работа приложения", QMessageBox.Ok)
+                
 
     def setupIconFakeTitle(self):
         path = 'ui' + os.path.sep + 'mainWindow.ico'
@@ -234,6 +244,7 @@ class MyWindow( QDialog ):
             self.ui.verticalLayout_2.addWidget( module )
             spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding);
             self.ui.verticalLayout_2.addSpacerItem(spacer)
+            module.showGUI()
             module.show()
             module.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             self.ui.scrollArea.setWidgetResizable(True)

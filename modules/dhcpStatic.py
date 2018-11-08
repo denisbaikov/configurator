@@ -1,22 +1,40 @@
 import sys
 import os
+import configparser
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QApplication, QVBoxLayout, QGridLayout, QLabel, QPushButton,\
-                             QSizePolicy,  QSpacerItem, QLayoutItem )
+                             QSizePolicy,  QSpacerItem, QLayoutItem, QMessageBox)
 
 class Page1(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self.moduleName = "dhcpStatic"
         self.serviceName = "dhcp"
-        self.dhcpConfigFile = "/etc/dhcp/dhcpd.conf"
+        self.dhcpConfigFile = "/etc/dhcp/dhcpd.cnf"
+        self.configFilePath = "./config.ini"
+        
+        self.conf=0
 
         self.groupCount = 0
         self.groupArray = {}
         self.allObjectsOfSection = {}
         self.ii = 2
         self.gridLayout = QtWidgets.QGridLayout(self)
+
+    def readConfigFile(self):
+        if not os.path.exists(self.configFilePath):
+            QMessageBox.critical(self, "Configurator", "Ошибка! Не найден конфигурационный файл приложения! Заданный путь: {0}".format( self.configFilePath ), QMessageBox.Ok)
+            return False
+
+        self.conf = configparser.ConfigParser()
+        self.conf.read(self.configFilePath)
+        self.dhcpConfigFile = self.conf.get("Settings", "dhcpStatic")
+
+        if not os.path.exists(self.dhcpConfigFile):
+            QMessageBox.critical(self, "Configurator", "Ошибка! Конфигурационный файл dhcp-сервера не найден! Заданный путь: {0}".format( self.dhcpConfigFile ), QMessageBox.Ok)
+            return False
+        return True
 
 
     def deleteObjectsOfSection(self):
@@ -35,12 +53,13 @@ class Page1(QWidget):
     
 
     def showGUI(self):
-        self. deleteObjectsOfSection()
-        self.groupCount = 0
-        self.groupArray = {}
-        self.allObjectsOfSection = {}
-        self.ii = 2
-        self.parserConfigFile()
+        if( self.readConfigFile() ):
+            self. deleteObjectsOfSection()
+            self.groupCount = 0
+            self.groupArray = {}
+            self.allObjectsOfSection = {}
+            self.ii = 2
+            self.parserConfigFile()
 
     def parserConfigFile(self):
         count=0

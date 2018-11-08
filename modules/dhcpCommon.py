@@ -19,7 +19,10 @@ class Page1(QWidget):
 
         self.ui = window.Ui_Form()        
         self.ui.setupUi(self)
+        self.showGUI()
 
+    def showGUI(self):
+         print()
 
 moduleName = "dhcpCommon"
 myClass = Page1()

@@ -16,6 +16,11 @@ class Page2(QWidget):
 
         self.ui = window.Ui_Form()        
         self.ui.setupUi(self)
+        self.showGUI()
+
+    def showGUI(self):
+        print()
+        
 
 moduleName = "Page 2"
 myClass = Page2()

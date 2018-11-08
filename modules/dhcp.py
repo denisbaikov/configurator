@@ -17,6 +17,11 @@ class DHCP(QWidget):
         self.serviceName = "dhcp"
 
         self.initUI()
+        self.showGUI()
+        
+        
+    def showGUI(self):
+        print()
 
 
     def initUI(self):
